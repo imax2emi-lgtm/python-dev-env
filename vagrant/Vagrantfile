@@ -1,0 +1,117 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  # Use Ubuntu 22.04 LTS
+  config.vm.box = "ubuntu/jammy64"
+  
+  # Create multiple VMs for different purposes
+  config.vm.define "python-dev" do |python_dev|
+    python_dev.vm.hostname = "python-dev"
+    python_dev.vm.network "private_network", ip: "192.168.56.10"
+    python_dev.vm.provider "virtualbox" do |vb|
+      vb.name = "python-dev-ubuntu"
+      vb.memory = "4096"
+      vb.cpus = 2
+    end
+  end
+
+  config.vm.define "python-test" do |python_test|
+    python_test.vm.hostname = "python-test"
+    python_test.vm.network "private_network", ip: "192.168.56.11"
+    python_test.vm.provider "virtualbox" do |vb|
+      vb.name = "python-test-ubuntu"
+      vb.memory = "2048"
+      vb.cpus = 2
+    end
+  end
+
+  # Fixed Folder synchronization - create shared folder if it doesn't exist
+  config.vm.synced_folder "../shared", "/home/vagrant/shared", 
+    type: "virtualbox",
+    owner: "vagrant",
+    group: "vagrant",
+    mount_options: ["dmode=755", "fmode=644"]
+
+  # Provider-specific configuration
+  config.vm.provider "virtualbox" do |vb|
+    vb.gui = false
+    vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+  end
+
+  # Provisioning - Reordered to ensure dependencies are met
+  config.vm.provision "shell", name: "create_shared_folder", inline: <<-SHELL
+    # Create shared directory on host if it doesn't exist
+    mkdir -p /vagrant/shared
+  SHELL
+
+  config.vm.provision "shell", name: "time", run: "always", path: "provision/time.sh" 
+  
+  # Install essential tools first (including vim) - FIXED: changed batcat to bat
+  config.vm.provision "shell", name: "install_essentials", inline: <<-SHELL
+    apt-get update
+    apt-get install -y vim git curl wget tree htop bat
+  SHELL
+
+  config.vm.provision "shell", name: "bootstrap", path: "provision/bootstrap.sh"
+  config.vm.provision "shell", name: "tools", path: "provision/install.tools.sh"
+  
+  # Copy dotfiles early
+  config.vm.provision "file", source: "provision/files/.bashrc", destination: ".bashrc"
+  config.vm.provision "file", source: "provision/files/.vimrc", destination: ".vimrc"
+
+  # Setup dotfiles and environment - REMOVED bat alias since we're using bat directly
+  config.vm.provision "shell", name: "dotfiles", privileged: false, inline: <<-DOTFILES
+    # Create necessary directories for vim
+    mkdir -p /home/vagrant/.vim/backups
+    mkdir -p /home/vagrant/.vim/swaps
+    mkdir -p /home/vagrant/.vim/undos
+
+    # Set proper ownership and permissions
+    chown -R vagrant:vagrant /home/vagrant/.vim
+    chown vagrant:vagrant /home/vagrant/.bashrc
+    chown vagrant:vagrant /home/vagrant/.vimrc
+
+    # Add aliases and other customizations
+    echo 'alias ll="ls -la"' >> /home/vagrant/.bashrc
+    echo 'alias py="python3"' >> /home/vagrant/.bashrc
+    echo 'alias pip="pip3"' >> /home/vagrant/.bashrc
+    
+    # Create .hushlogin to suppress welcome message
+    touch /home/vagrant/.hushlogin
+    
+    # Source bashrc in bash_profile
+    echo 'if [ -f ~/.bashrc ]; then' >> /home/vagrant/.bash_profile
+    echo '    source ~/.bashrc' >> /home/vagrant/.bash_profile
+    echo 'fi' >> /home/vagrant/.bash_profile
+
+    # Set proper permissions
+    chown vagrant:vagrant /home/vagrant/.bash_profile
+    chown vagrant:vagrant /home/vagrant/.hushlogin
+
+    # Create useful directories
+    mkdir -p /home/vagrant/{workspace,projects,scripts,logs}
+    chown vagrant:vagrant /home/vagrant/{workspace,projects,scripts,logs}
+  DOTFILES
+
+  # Python environment (after basic setup)
+  config.vm.provision "shell", name: "pythonenv", path: "provision/setup-python.sh"
+
+  # Final customization that might depend on Python being installed
+  config.vm.provision "shell", name: "final_setup", privileged: false, inline: <<-FINAL
+    # Add Python-related aliases that might depend on setup-python.sh
+    echo 'alias jupyter="jupyter notebook --ip=0.0.0.0 --no-browser"' >> /home/vagrant/.bashrc
+    echo 'alias activate="source venv/bin/activate"' >> /home/vagrant/.bashrc
+    
+    # Welcome message
+    echo 'echo "=== Python Development Environment ==="' >> /home/vagrant/.bashrc
+    echo 'echo "VM: $(hostname) - IP: $(hostname -I | awk \"{print \\$2}\")"' >> /home/vagrant/.bashrc
+    echo 'echo "Shared folder: ~/shared"' >> /home/vagrant/.bashrc
+    echo 'echo "Workspace: ~/workspace"' >> /home/vagrant/.bashrc
+    
+    # Initialize shared folder with some structure
+    mkdir -p /home/vagrant/shared/{projects,data,scripts}
+    chown -R vagrant:vagrant /home/vagrant/shared
+  FINAL
+end

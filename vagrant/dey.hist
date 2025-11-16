@@ -1,0 +1,121 @@
+ 1  apt update
+    2  apt install -y wget
+    3  apt install -y build-essentials libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libncurses5-dev libncursesw5-dev xz-utils tk-dev
+    4  dpkg --configure -a
+    5  apt install build-essential
+    6  apt install -y libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libncurses5-dev libncursesw5-dev xz-utils tk-dev
+    7  cd /usr/src/
+    8  wget https://www.python.org/ftp/python/3.13.9/Python-3.13.9.tgz
+    9  tar xf Python-3.13.9.tgz
+   10  ls
+   11  ls -al
+   12  cd Python-3.13.9/
+   13  ls -al
+   14  ./configure --enable-optimizations
+   15  make altinstall
+   16  history
+
+
+   ls
+    2  hostnamectl
+    3  ls -al
+    4  cd workspace/
+    5  ls
+    6  cd ..
+    7  ls
+    8  cd shared/
+    9  ls
+   10  cd projects/
+   11  ls
+   12  sudo su -
+   13  python2.13
+   14  python3.13
+   15  sudo pip3.13 install --upgrade pip
+   16  mkdir python-scripting; cd python-scripting
+   17  pip3.13 install virtualenv
+   18  echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+   19  source ~/.bashrc
+   20  cd ~/workspace/
+   21  ls
+   22  source ~/.bashrc
+   23  mkdir python-scripting; cd python-scripting-basics
+   24  mkdir python-scripting
+   25  ls
+   26  cd python-scripting/
+   27  cd ..
+   28  cd python-scripting/
+   29  nkdir basic
+   30  mkdir basic-scripting
+   31  cd basic-scripting/
+   32  python3.13 -m venv py-env
+   33  source py-env/bin/activate
+   34  history
+
+   basic-scripting $ history
+    1  ls
+    2  hostnamectl
+    3  ls -al
+    4  cd workspace/
+    5  ls
+    6  cd ..
+    7  ls
+    8  cd shared/
+    9  ls
+   10  cd projects/
+   11  ls
+   12  sudo su -
+   13  python2.13
+   14  python3.13
+   15  sudo pip3.13 install --upgrade pip
+   16  mkdir python-scripting; cd python-scripting
+   17  pip3.13 install virtualenv
+   18  echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+   19  source ~/.bashrc
+   20  cd ~/workspace/
+   21  ls
+   22  source ~/.bashrc
+   23  mkdir python-scripting; cd python-scripting-basics
+   24  mkdir python-scripting
+   25  ls
+   26  cd python-scripting/
+   27  cd ..
+   28  cd python-scripting/
+   29  nkdir basic
+   30  mkdir basic-scripting
+   31  cd basic-scripting/
+   32  python3.13 -m venv py-env
+   33  source py-env/bin/activate
+   34  history
+   35  which python
+   36  pip install requests numpy
+   37  pip install --upgrade pip
+   38  python
+   39  vim hello.py
+   40  python hello.py
+   41  vim hello.py
+   42  python hello.py
+   43  chmod u+x hello.py
+   44  ./hello.py
+   45  vim hello.py
+   46  vim hello.py
+   47  ./hello.py
+   48  python hello.py
+   49  mv hello.py hello
+   50  ./hello
+   51  vim hello.py
+   52  ls
+   53  vim hello
+   54  ./hello
+   55  echo $PATH
+   56  mkdir bin; mv hello bin/
+   57  hello
+   58  echo $PATH
+   59  export PATH="$HOME/vagrant/workspace/python-scripting/basic-scripting/py-env/bin:$PATH"
+   60  hello
+   61  source ~/.bashrc
+   62  source ~/.bashrc
+   63  export PATH="./bin:$PATH"
+   64  hello
+   65  hello
+   66  history
+basic-scripting $
